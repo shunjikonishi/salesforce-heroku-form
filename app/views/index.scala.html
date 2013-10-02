@@ -1,0 +1,88 @@
+@(app: AppStatus, obj: jp.co.flect.salesforce.SObjectDef = null)
+@base("Heroku & Salesforce OAuth sample") {
+<div class="container">
+	<h1>Heroku & Salesforce OAuth sample</h1>
+	<div class="row">
+		<div class="col-md-offset-2 col-md-10">
+			<p>SalesforceとHerokuの両方をOAuthで操作するサンプルです。</p>
+			<p>選択したSalesforceオブジェクトを元にHeroku上に連携アプリケーションを生成します。</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2">
+			<ul>
+				<li>トップ</li>
+				<li>Salesforceオブジェクトの選択</li>
+				<li>フォーム化するフィールドの選択</li>
+				<li>Herokuアプリの生成</li>
+			</ul>
+		</div>
+@if(app.status == AppStatus.INDEX) {
+		<div class="col-md-10">
+			<h2>Step1 SalesforceにOAuthでログイン</h2>
+			<p>
+				まずはSalesforceにOAuthでログインしてください。
+			</p>
+			<p>
+				<a href="@app.salesforceLoginUrl" class="btn btn-primary">SalesforceにOAuthでログイン</a>
+			</p>
+		</div>
+}
+@if(app.status == AppStatus.LOGIN_SALESFORCE) {
+		<div class="col-md-10">
+			<h2>Step2 オブジェクトの選択</h2>
+			<p>
+				選択したオブジェクトを元にWebフォームを作成します。
+			</p>
+			<div>
+				<label>オブジェクト</label>
+				<select id="selObject">
+					<option value=""></option>
+					@app.objectList.map { obj =>
+						<option value="@obj.getName">@obj.getLabel (@obj.getName)</option>
+					}
+				</select>
+			</div>
+			<div>
+				<button id="btnSelObject" class="btn btn-primary" disabled>選択</button>
+			</div>
+			<div id="fieldList"></div>
+		</div>
+}
+@if(app.status == AppStatus.SELECT_OBJECT) {
+		<div class="col-md-10">
+			<h2>Step3 フィールドの選択</h2>
+			<p>
+				選択したフィールドを元にWebフォームを作成します。
+			</p>
+			<p>
+				フィールドは選択した順にフォームに追加されます。
+			</p>
+			<h3>@obj.getLabel (@obj.getName)</h3>
+			<table class="table">
+				<thead class="selectField-head">
+					<tr>
+						<th>&nbsp;</th>
+						<th>フィールド名</th>
+						<th>ラベル</th>
+						<th>データ型</th>
+					</tr>
+				</thead>
+				<tbody class="selectField-body">
+					@obj.getFieldList.map { f =>
+						@if(f.isCreateable && f.isUpdateable) {
+							<tr>
+								<td><input type="checkbox" name="field" value="@f.getName"></td>
+								<td>@f.getName</td>
+								<td>@f.getLabel</td>
+								<td>@f.getFieldType</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+		</div>
+}
+	</div>
+</div>    
+}

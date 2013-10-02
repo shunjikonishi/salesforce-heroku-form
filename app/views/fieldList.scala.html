@@ -1,0 +1,24 @@
+@(app: AppStatus, objectDef: jp.co.flect.salesforce.SObjectDef)
+<div>
+	<h3>オブジェクト情報</h3>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>フィールド名</th>
+				<th>ラベル</th>
+				<th>データ型</th>
+			</tr>
+		</thead>
+		<tbody>
+			@objectDef.getFieldList.map { f =>
+				@if(f.isCreateable && f.isUpdateable) {
+					<tr>
+						<td>@f.getName</td>
+						<td>@f.getLabel</td>
+						<td>@f.getFieldType</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+</div>

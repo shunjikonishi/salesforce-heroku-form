@@ -1,0 +1,23 @@
+@(title: String)(content: Html)
+<!DOCTYPE html>
+<html>
+<head>
+<title>@title</title>
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("javascripts/ext/bootstrap3/css/bootstrap.min.css")">
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+<link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="@routes.Assets.at("javascripts/ext/bootstrap3/js/bootstrap.min.js")"></script>
+<script src="@routes.Assets.at("javascripts/salesforce2heroku.js")"></script>
+<script>
+
+var app;
+$(function() {
+	app = new flect.app.Salesforce2Heroku();
+})
+</script>
+</head>
+<body>
+@content
+</body>
+</html>
