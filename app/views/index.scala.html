@@ -1,5 +1,17 @@
-@(app: AppStatus, obj: jp.co.flect.salesforce.SObjectDef = null)
+@(app: AppStatus, obj: Option[jp.co.flect.salesforce.SObjectDef] = None)
 @base("Heroku & Salesforce OAuth sample") {
+<script>
+var app;
+$(function() {
+	var status = @app.status.index,
+		obj = {
+			"name" :  "@obj.map(_.getName).getOrElse("Unknown")",
+			"label" : "@obj.map(_.getLabel).getOrElse("Unknown")",
+			"fields" : @Html(obj.map(app.toJson(_)).getOrElse("[]"))
+		};
+	app = new flect.app.Salesforce2Heroku(status, obj);
+})
+</script>
 <div class="container">
 	<h1>Heroku & Salesforce OAuth sample</h1>
 	<div class="row">
@@ -10,7 +22,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-2">
-			<ul>
+			<ul id="navList">
 				<li>トップ</li>
 				<li>Salesforceオブジェクトの選択</li>
 				<li>フォーム化するフィールドの選択</li>
@@ -46,6 +58,10 @@
 			<div>
 				<button id="btnSelObject" class="btn btn-primary" disabled>選択</button>
 			</div>
+			<div id="fieldLoading" style="display:none;">
+				<img src="/assets/images/loading.gif">
+				フィールド情報を取得中。。。
+			</div>
 			<div id="fieldList"></div>
 		</div>
 }
@@ -58,8 +74,8 @@
 			<p>
 				フィールドは選択した順にフォームに追加されます。
 			</p>
-			<h3>@obj.getLabel (@obj.getName)</h3>
-			<table class="table">
+			<h3>@obj.map(_.getLabel) (@obj.map(_.getName))</h3>
+			<table class="table" id="tblSelectField">
 				<thead class="selectField-head">
 					<tr>
 						<th>&nbsp;</th>
@@ -69,7 +85,7 @@
 					</tr>
 				</thead>
 				<tbody class="selectField-body">
-					@obj.getFieldList.map { f =>
+					@obj.get.getFieldList.map { f =>
 						@if(f.isCreateable && f.isUpdateable) {
 							<tr>
 								<td><input type="checkbox" name="field" value="@f.getName"></td>
@@ -81,6 +97,10 @@
 					}
 				</tbody>
 			</table>
+		</div>
+		<div class="col-md-10">
+			<form id="generatedForm">
+			</form>
 		</div>
 }
 	</div>

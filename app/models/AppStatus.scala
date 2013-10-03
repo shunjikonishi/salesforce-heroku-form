@@ -1,5 +1,7 @@
 package models;
 
+import scala.collection.JavaConversions._
+
 import play.api.cache.Cache;
 import play.api.Play.current;
 import play.api.mvc.Request;
@@ -8,6 +10,8 @@ import play.api.mvc.AnyContent;
 import jp.co.flect.play2.utils.Params;
 import jp.co.flect.salesforce.SalesforceClient;
 import jp.co.flect.salesforce.SObjectDef;
+import jp.co.flect.salesforce.PicklistEntry;
+import com.google.gson.Gson;
 
 object AppStatus {
 
@@ -61,6 +65,23 @@ class AppStatus(host: String, val sessionId: String) {
         status = AppStatus.INDEX;
         throw new RedirectException("Not logined", "/");
     }
+  }
+  
+  def toJson(obj: SObjectDef) = {
+    val fieldList = obj.getFieldList.map(_.getMap);
+    fieldList.foreach { map =>
+      val pickList = map.get("picklistValues");
+      pickList match {
+        case x: java.util.List[_] =>
+          map.put("picklistValues", asJavaCollection(x.map{ _ match {
+            case y: PicklistEntry => y.getMap;
+            case z => z;
+          }}));
+        case _ =>
+      }
+    }
+    println(asJavaCollection(fieldList));
+    new Gson().toJson(asJavaCollection(fieldList));
   }
 }
 

@@ -27,7 +27,9 @@ object Application extends Controller {
     } else {
       app.status = AppStatus.SELECT_OBJECT;
       try {
-        Ok(views.html.index(app, app.getObjectDef(name)));
+        var obj = app.getObjectDef(name);
+        
+        Ok(views.html.index(app, Some(obj)));
       } catch {
         case e: RedirectException =>
           e.printStackTrace;
