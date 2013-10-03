@@ -10,6 +10,18 @@ object Application extends Controller {
   
   def index = Action { implicit request =>
     val app = AppStatus(request);
+    app.status = AppStatus.INDEX;
+    try {
+      Ok(views.html.index(app));
+    } catch {
+      case e: RedirectException =>
+        e.printStackTrace;
+        Redirect(e.url);
+    }
+  }
+  
+  def selectObject = Action { implicit request =>
+    val app = AppStatus(request);
     try {
       Ok(views.html.index(app));
     } catch {

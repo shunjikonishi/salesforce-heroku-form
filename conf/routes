@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /selectObject               controllers.Application.index
+GET     /selectObject               controllers.Application.selectObject
 GET     /login                      controllers.Application.login(code: String)
 GET     /fieldList/:name            controllers.Application.fieldList(name: String)
 GET     /selectField/:name          controllers.Application.selectField(name: String)
