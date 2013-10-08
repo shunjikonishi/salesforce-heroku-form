@@ -102,6 +102,34 @@ $(function() {
 			<form id="generatedForm">
 			</form>
 		</div>
+		<div class="col-md-10 col-md-offset-2">
+			<p>
+				フォームができあがったらこのフォームを元にHeroku上にアプリケーションを生成します。
+			</p>
+			<button id="btnHerokuLogin" class="btn btn-primary">HerokuにOAuthでログイン</button>
+		</div>
+}
+@if(app.status == AppStatus.SELECT_FIELD) {
+		<div class="col-md-10">
+			<h2>Step4 Herokuアプリケーションの設定</h2>
+			<p>
+				Herokuアプリケーションを生成するための設定を行います。
+			</p>
+			<p>
+				Salesforceのユーザー情報はアプリからSalesforceに入力データを同期させるために必要です。
+			</p>
+			<form id="herokuForm" action="generateApp" method="post">
+				<fieldset>
+					<ul>
+						<li><label>アプリケーション名</label><input name="appName"></li>
+						<li><label>Salesforce ユーザ名</label><input name="salseforceUser"></li>
+						<li><label>Salesforce パスワード</label><input name="salesforcePass"></li>
+						<li><label>Salesforce APIトークン</label><input name="salesforceToken"></li>
+					</ul>
+				</fieldset>
+				<input type="submit" value="生成" class="btn btn-primary">
+			</form>
+		</div>
 }
 	</div>
 </div>    

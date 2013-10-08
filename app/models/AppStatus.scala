@@ -18,6 +18,8 @@ object AppStatus {
   val INDEX = new StatusValue(1, "index");
   val LOGIN_SALESFORCE = new StatusValue(2, "loginSalesforce");
   val SELECT_OBJECT = new StatusValue(3, "selectObject");
+  val SELECT_FIELD = new StatusValue(4, "selectField");
+  val LOGIN_HEROKU = new StatusValue(5, "loginHeroku");
 
   def apply(request: Request[AnyContent]) = new AppStatus(request.host, new Params(request).sessionId);
   
@@ -31,6 +33,9 @@ class AppStatus(host: String, val sessionId: String) {
 
   def status = Cache.getOrElse[StatusValue](sessionId + "-status", 7200) { AppStatus.INDEX}
   def status_=(v: StatusValue) { Cache.set(sessionId + "-status", v, 7200)}
+  
+  def objectName = Cache.getOrElse[String](sessionId + "-objectName", 7200) { ""}
+  def objectName_=(v: String) { Cache.set(sessionId + "-objectName", v, 7200)}
   
   def salesforceLoginUrl = Salesforce.getLoginUrl(host);
   
@@ -83,6 +88,18 @@ class AppStatus(host: String, val sessionId: String) {
     println(asJavaCollection(fieldList));
     new Gson().toJson(asJavaCollection(fieldList));
   }
+  
+  def saveJson(json: String) = {
+    Cache.set(sessionId + "-json", json, 7200);
+    status = AppStatus.SELECT_FIELD;
+  }
+  
+  def herokuLogin(code: String) = {
+    val api = Heroku.login(code);
+    status = AppStatus.LOGIN_HEROKU;
+    Cache.set(sessionId + "-heroku", api, 7200);
+  }
+  
 }
 
 case class SalesforceLoginInfo(sessionId: String, endpoint: String);

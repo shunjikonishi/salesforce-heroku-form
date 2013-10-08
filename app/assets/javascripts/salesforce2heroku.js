@@ -4,6 +4,7 @@ if (typeof(flect.app) === "undefined") flect.app = {};
 flect.app.Salesforce2Heroku = function(status, obj) {
 	var formJson = {
 		"title" : obj.label,
+		"helpImage" : "/public/images/help.png",
 		"items" : {},
 		"requiredAppendix" : "<span style='color:red;'>(*)</span>"
 	};
@@ -69,6 +70,9 @@ flect.app.Salesforce2Heroku = function(status, obj) {
 				item.number = true;
 			} else if (f.type == "boolean") {
 				item.type = "checkbox";
+				if (f.defaultedOnCreate) {
+					item.checked = true;
+				}
 			} else if (f.type == "date") {
 				item.type = "date";
 			} else if (f.type == "picklist") {
@@ -92,12 +96,27 @@ flect.app.Salesforce2Heroku = function(status, obj) {
 			if (!f.nillable) {
 				item.required = true;
 			}
+			if (f.inlineHelpText) {
+				item.helpText = f.inlineHelpText;
+			}
 			formJson.items[name] = item;
 		} else {
 			delete formJson.items[name];
 		}
 		$.removeData($form[0], "validator");
 		$form.empty().formbuilder(formJson);
+	});
+	$("#btnHerokuLogin").click(function() {
+		$.ajax({
+			"url" : "/postJson",
+			"type" : "POST",
+			"data" : {
+				"json" : JSON.stringify(formJson)
+			}, 
+			"success" : function(data) {
+				location.href = data;
+			}
+		});
 	});
 	
 	$.extend(this, {
