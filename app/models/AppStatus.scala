@@ -11,6 +11,8 @@ import jp.co.flect.play2.utils.Params;
 import jp.co.flect.salesforce.SalesforceClient;
 import jp.co.flect.salesforce.SObjectDef;
 import jp.co.flect.salesforce.PicklistEntry;
+import jp.co.flect.heroku.platformapi.PlatformApi;
+import jp.co.flect.heroku.platformapi.model.Region;
 import com.google.gson.Gson;
 
 object AppStatus {
@@ -94,12 +96,39 @@ class AppStatus(host: String, val sessionId: String) {
     status = AppStatus.SELECT_FIELD;
   }
   
+  def loadJson = {
+    Cache.getOrElse[String](sessionId + "-json", 7200) {"{}"};
+  }
+  
   def herokuLogin(code: String) = {
     val api = Heroku.login(code);
     status = AppStatus.LOGIN_HEROKU;
     Cache.set(sessionId + "-heroku", api, 7200);
   }
   
+  def generateApp(appName: String, sfUser: Option[String], sfPass: Option[String], sfToken: Option[String]) = {
+    val api = Cache.getAs[PlatformApi](sessionId + "-heroku").get;
+    val app = api.createApp(appName, Region.US);
+    api.addCollaborator(appName, Heroku.HEROKU_USERNAME);
+    val map = if (sfUser.isDefined && sfPass.isDefined && sfToken.isDefined) {
+      Map(
+        "SALESFORCE_USERNAME" -> sfUser.get,
+        "SALESFORCE_PASSWORD" -> sfPass.get,
+        "SALESFORCE_TOKEN" -> sfToken.get
+      )
+    } else {
+      Map()
+    } + ("SALESFORCE_OBJECT_NAME" -> objectName);
+    api.setConfigVars(appName, map);
+    
+    val adminApi = Heroku.adminApi;
+    if (Git.init) {
+      val publicKey = Git.publicKeyStr;
+      adminApi.addKey(publicKey);
+    }
+    Git.cloneApp;
+    Git.push(app.getGitUrl, loadJson);
+  }
 }
 
 case class SalesforceLoginInfo(sessionId: String, endpoint: String);

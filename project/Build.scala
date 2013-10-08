@@ -12,6 +12,7 @@ object ApplicationBuild extends Build {
     "org.apache.velocity" % "velocity" % "1.7",
     "com.google.code.gson" % "gson" % "2.2.4",
     "org.apache.httpcomponents" % "httpclient" % "4.2.4",
+    "org.postgresql" % "postgresql" % "9.2-1003-jdbc4",
     jdbc,
     anorm
   )

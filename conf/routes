@@ -11,6 +11,9 @@ GET     /selectField/:name          controllers.Application.selectField(name: St
 POST    /postJson                   controllers.Application.postJson
 GET     /heroku/login               controllers.Application.herokuLogin(code: String)
 GET     /herokuSetting              controllers.Application.herokuSetting
+POST    /generateApp                controllers.Application.generateApp
+
+GET     /gitinit                    controllers.Application.gitInit
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

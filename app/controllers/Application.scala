@@ -2,6 +2,10 @@ package controllers
 
 import play.api._
 import play.api.mvc._
+import play.api.data.Form;
+import play.api.data.Forms.tuple;
+import play.api.data.Forms.text;
+import play.api.data.Forms.optional;
 import models.Heroku;
 import models.Salesforce;
 import models.AppStatus;
@@ -98,8 +102,29 @@ object Application extends Controller {
     }
   }
   
+  
+  private val generateForm = Form(tuple(
+    "appName" -> text,
+    "salesforceUser" -> optional(text),
+    "salesforcePass" -> optional(text),
+    "salesforceToken" -> optional(text)
+  ));
+  
   def generateApp = Action { implicit request =>
-    Ok("hoge");
+    val data = generateForm.bindFromRequest;
+    if (data.hasErrors) {
+      BadRequest;
+    } else {
+      val app = AppStatus(request);
+      val (appName, sfUser, sfPass, sfToken) = data.get;
+      app.generateApp(appName, sfUser, sfPass, sfToken);
+      Redirect("http://" + appName + ".herokuapp.com/");
+    }
+  }
+  
+  def gitInit = Action { implicit request =>
+    models.Git.init;
+    Ok("OK");
   }
   
 }
