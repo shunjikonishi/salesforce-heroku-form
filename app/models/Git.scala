@@ -76,7 +76,8 @@ println("test1: " + dir.exists + ", " + workDir.exists);
       "-f",
       dir.toString + File.separator + privateKey.getName,
       "-N",
-      "\"\""
+      //"\"\""
+      ""
     );
     runCommand(commands);
     val table = new SshKeyTable();
