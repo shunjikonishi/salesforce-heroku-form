@@ -27,9 +27,7 @@ object Git {
   def init = {
     val workDir = new File("work");
     workDir.mkdirs();
-    if (!dir.exists) {
-      dir.mkdirs();
-    }
+    dir.mkdirs();
     if (!privateKey.exists || !publicKey.exists) {
       if (!loadKeys) {
         generateKeys;
