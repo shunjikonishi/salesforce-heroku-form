@@ -16,7 +16,11 @@ flect.app.Salesforce2Heroku = function(status, obj) {
 		}
 		location.href= "/selectField/" + name;
 	});
-	$("#navList").find("li:eq(" + (status - 1) + ")").each(function() {
+	var navIndex = status - 1;
+	if (navIndex > 3) {
+		navIndex = 3;
+	}
+	$("#navList").find("li:eq(" + navIndex + ")").each(function() {
 		var li = $(this),
 			text = li.text();
 		li.html("<b>" + text + "</b>");

@@ -19,9 +19,14 @@ object AppStatus {
 
   val INDEX = new StatusValue(1, "index");
   val LOGIN_SALESFORCE = new StatusValue(2, "loginSalesforce");
-  val SELECT_OBJECT = new StatusValue(3, "selectObject");
-  val SELECT_FIELD = new StatusValue(4, "selectField");
-  val LOGIN_HEROKU = new StatusValue(5, "loginHeroku");
+  val SELECT_OBJECT    = new StatusValue(3, "selectObject");
+  val SELECT_FIELD     = new StatusValue(4, "selectField");
+  val LOGIN_HEROKU     = new StatusValue(5, "loginHeroku");
+  val START_GENERATE   = new StatusValue(6, "startGenerated");
+  val APP_GENERATED    = new StatusValue(7, "appGenerated");
+  val GIT_WAIT         = new StatusValue(8, "gitWait");
+  val GIT_PUSH         = new StatusValue(9, "gitPush");
+  val END_GENERATE     = new StatusValue(10, "endGenerated");
 
   def apply(request: Request[AnyContent]) = new AppStatus(request.host, new Params(request).sessionId);
   
@@ -38,6 +43,9 @@ class AppStatus(host: String, val sessionId: String) {
   
   def objectName = Cache.getOrElse[String](sessionId + "-objectName", 7200) { ""}
   def objectName_=(v: String) { Cache.set(sessionId + "-objectName", v, 7200)}
+  
+  def appName = Cache.getOrElse[String](sessionId + "-appName", 7200) { ""}
+  def appName_=(v: String) { Cache.set(sessionId + "-appName", v, 7200)}
   
   def salesforceLoginUrl = Salesforce.getLoginUrl(host);
   
@@ -110,7 +118,7 @@ class AppStatus(host: String, val sessionId: String) {
     val api = Cache.getAs[PlatformApi](sessionId + "-heroku").get;
     val app = api.createApp(appName, Region.US);
     api.addCollaborator(appName, Heroku.HEROKU_USERNAME);
-    val map = if (sfUser.isDefined && sfPass.isDefined && sfToken.isDefined) {
+    val map = (if (sfUser.isDefined && sfPass.isDefined && sfToken.isDefined) {
       Map(
         "SALESFORCE_USERNAME" -> sfUser.get,
         "SALESFORCE_PASSWORD" -> sfPass.get,
@@ -118,16 +126,13 @@ class AppStatus(host: String, val sessionId: String) {
       )
     } else {
       Map()
-    } + ("SALESFORCE_OBJECT_NAME" -> objectName);
+    }) ++ Map("SALESFORCE_OBJECT_NAME" -> objectName);
     api.setConfigVars(appName, map);
+    status = AppStatus.APP_GENERATED;
     
-    val adminApi = Heroku.adminApi;
-    if (Git.init) {
-      val publicKey = Git.publicKeyStr;
-      adminApi.addKey(publicKey);
-    }
-    Git.cloneApp;
-    Git.push(app.getGitUrl, loadJson);
+    Ssh.init;
+    
+    Heroku.cloneApp(this, app.getGitUrl, loadJson);
   }
 }
 

@@ -1,7 +1,8 @@
 package controllers
 
-import play.api._
-import play.api.mvc._
+import play.api.Play.current;
+import play.api.mvc.Controller;
+import play.api.mvc.Action;
 import play.api.data.Form;
 import play.api.data.Forms.tuple;
 import play.api.data.Forms.text;
@@ -11,6 +12,11 @@ import models.Salesforce;
 import models.AppStatus;
 import models.RedirectException;
 import jp.co.flect.play2.utils.Params;
+
+import play.api.libs.concurrent.Akka;
+import scala.concurrent.duration.DurationInt;
+import play.api.libs.concurrent.Execution.Implicits.defaultContext;
+
 
 object Application extends Controller {
   
@@ -117,14 +123,23 @@ object Application extends Controller {
     } else {
       val app = AppStatus(request);
       val (appName, sfUser, sfPass, sfToken) = data.get;
-      app.generateApp(appName, sfUser, sfPass, sfToken);
-      Redirect("http://" + appName + ".herokuapp.com/");
+      app.appName = appName;
+      app.status = AppStatus.START_GENERATE;
+      Akka.system.scheduler.scheduleOnce(0 seconds) {
+        app.generateApp(appName, sfUser, sfPass, sfToken);
+      }
+      Redirect("/waitGenerating");
     }
   }
   
-  def gitInit = Action { implicit request =>
-    models.Git.init;
-    Ok("OK");
-  }
+  def waitGenerating = Action { implicit request =>
+    val app = AppStatus(request);
+    if (app.status == AppStatus.END_GENERATE) {
+      app.status = AppStatus.INDEX;
+      Redirect("https://" + app.appName + ".herokuapp.com/");
+    } else {
+      Ok(views.html.index(app));
+    }
+ }
   
 }
