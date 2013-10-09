@@ -96,6 +96,10 @@ flect.app.Salesforce2Heroku = function(status, obj) {
 					}
 				}
 				item.values = options;
+			} else if (f.type == "email") {
+				item.email = true;
+			} else if (f.type == "url") {
+				item.url = true;
 			}
 			if (!f.nillable) {
 				item.required = true;
