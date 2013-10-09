@@ -103,6 +103,7 @@ println("test1: " + dir.exists + ", " + workDir.exists);
   
   def push(gitUri: String, json: String) {
     synchronized {
+println("push1: " + gitUri);
       val appDir = new File("work", BASE_APP);
       val jsonFile = new File("work/" + BASE_APP + "/app/data/form.json");
       FileUtils.writeFile(jsonFile, json.getBytes("utf-8"));
@@ -113,12 +114,14 @@ println("test1: " + dir.exists + ", " + workDir.exists);
         "-m",
         "updateJson"
       ), appDir);
+println("push2: ");
       runCommand(Array(
         "git",
         "push",
         gitUri,
         "master"
       ), appDir);
+println("push3: ");
     }
   }
   
