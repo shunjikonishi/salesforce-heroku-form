@@ -30,6 +30,7 @@ object Git {
     dir.mkdirs();
 println("test1: " + dir.exists + ", " + workDir.exists);
     if (!privateKey.exists || !publicKey.exists) {
+      FileUtils.writeFile(new File(dir, "config"), "StrictHostKeyChecking no".getBytes("utf-8"));
       if (!loadKeys) {
         generateKeys;
         true;
