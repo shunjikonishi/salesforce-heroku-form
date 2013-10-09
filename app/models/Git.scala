@@ -18,7 +18,7 @@ import jp.co.flect.io.FileUtils;
 object Git {
   
   private val BASE_APP = "enq-app";
-  private val APP_GITHUB = "git@github.com:shunjikonishi/enq-app.git";
+  private val APP_GITHUB = "https://github.com/shunjikonishi/enq-app.git";
   
   private val dir = new File(".ssh");
   private val privateKey = new File(dir, "id_rsa");
